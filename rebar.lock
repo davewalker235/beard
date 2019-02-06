@@ -1,0 +1,4 @@
+[{<<"sync">>,
+  {git,"git://github.com/rustyio/sync.git",
+       {ref,"d7ded2d221fb542b3417cffe77163206613daacb"}},
+  0}].

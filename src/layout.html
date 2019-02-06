@@ -1,0 +1,44 @@
+<html>
+
+<title> Test
+<link rel=stylesheet data-test={{ var }} href=/static/style.css>
+
+<h1> Test
+<p>
+  This is a test of the indented syntax
+  This content is still part of the p above
+
+<div
+  class=blah
+  data-test=testblah
+  more=hello
+>
+
+<div class="blah test hello">
+  This div is also started on the same line
+  but continues on the next {{ test }}
+  here's another format <span>{{ test }}</span>
+  <p>
+    This paragraph is under the div
+
+
+{{> partial/item }}
+
+<p> This paragraph is back up on the main level
+  <p> This paragraph is under the last one and should throw an error
+
+This is back to normal <span>Test</span>
+<a href=blah>What if I want to start a line with a link?</a> and keep going?
+How will the compiler handle that?
+
+<p>
+  dammit syntax highlighter
+
+<ul if=conn.user>
+  <li loop=items><a href="{{ i.href }}"> {{ i }}
+  <li><a href=#> List item 1
+  <li><a href=#> List item 2
+  <li><a href=#> List item 3
+  <test if=conn.user>
+  <blah not=conn.user class=blahtest>
+  {{ conn.user }}
