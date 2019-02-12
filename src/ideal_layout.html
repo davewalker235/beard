@@ -35,21 +35,14 @@ How will the compiler handle that?
 <p>
   dammit syntax highlighter
 
-<test if=conn.user>
-  test
-  <blah not=conn.user class=blahtest>
-    {{ conn.user }}
-
-<if=conn.user> test
-
 <ul if=conn.user>
   <li loop=items><a href="{{ i.href }}"> {{ i }}
   <li><a href=#> List item 1
   <li><a href=#> List item 2
   <li><a href=#> List item 3
-  <li><a>
-    Line One
-    Line Two
-    <ul>
-      <li> Line Three
-      {{ test }}
+  <test if=conn.user>
+    test
+  <blah not=conn.user class=blahtest>
+    {{ conn.user }}
+
+<if=conn.user> test

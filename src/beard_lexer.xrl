@@ -1,46 +1,51 @@
 Definitions.
 
+
 Indent = \n+\s*
-WhiteSpace = \s+
-TagOpen = <[a-zA-Z]+?>\s?
-TagStart = <[a-zA-Z]+
-TagEnd = >\s?
-TagClose = </[a-zA-Z]+?>
-Mustache = \{\{[^}]+?\}\}
+TagOpen = <[a-zA-Z0-9]+[^>]*>
+TagClose = </[a-zA-Z0-9]+>
 
 Rules.
 
-{Indent} : {token, {indent, TokenLine, length(string:trim(TokenChars, leading, "\n")) div 2}}.
-{Mustache} : {token, {erl, TokenLine, string:trim(TokenChars, both, "{ }")}}.
-{TagOpen} : {token, {tag_open, TokenLine, string:trim(TokenChars, both, "<> ")}}.
-{TagStart} : {token, {tag_start, TokenLine, string:trim(TokenChars, leading, "<")}}.
-{TagEnd} : {token, {tag_end, TokenLine}}.
-{TagClose} : {token, {tag_close, TokenLine, string:trim(TokenChars, both, "<>/")}}.
-[^<\n>{}]+ : {token, {string, TokenLine, TokenChars}}.
-{WhiteSpace} : skip_token.
+{TagClose} : {token, {tag_close, TokenLine, string:trim(TokenChars, both, "</>")}}.
+{TagOpen} : parse_tag(TokenChars, TokenLine).
+{Indent} : {token, {newline, TokenLine, length(string:trim(TokenChars, leading, "\n")) div 2}}.
+[^<\n]+? : {token, {string, TokenLine, binary:list_to_bin(TokenChars)}}.
 
 Erlang code.
 
 -export([lex/1]).
--define(VOID_ELEMENTS, [area, base, br, col, embed, hr, img, input, link, meta, param, source, track, wbr]).
+-define(VOID_ELEMENTS, ["html", "area", "base", "br", "col", "embed", "hr", "img", 
+  "input", "link", "meta", "param", "source", "track", "wbr"]).
 
 lex(String) ->
-  {ok, Tokens, End} = string(String),
-  {ok, parse_indents(0, [], Tokens), End}.
+  {ok, Tokens1, End} = string(String),
+  Tokens2 = parse_indents(Tokens1),
+  {ok, Tokens2, End}.
 
-parse_indents(_, Acc, []) -> lists:reverse(Acc);
-parse_indents(Prev, Acc, [{indent, Line, Curr} | T]) ->
-  Acc1 = case Curr - Prev of
-    N when N > 0 -> [{indent, Line, abs(N)} | Acc];
-    N when N < 0 -> [{dedent, Line, abs(N)} | Acc];
+parse_indents(Tokens) ->
+  parse_indents(0, [], Tokens).
+parse_indents(_, Acc, []) ->
+  lists:reverse(Acc);
+parse_indents(PrevIndent, Acc, [{newline, Line, CurrentIndent} | T]) ->
+  Acc1 = case CurrentIndent - PrevIndent of
+    N when N > 0 -> lists:duplicate(N, {indent, Line}) ++ Acc;
+    N when N < 0 -> lists:duplicate(abs(N), {dedent, Line}) ++ Acc;
     N when N == 0 -> [{newline, Line} | Acc]
   end,
-  parse_indents(Curr, Acc1, T);
-parse_indents(Level1, Acc, [H | T]) ->
-  parse_indents(Level1, [H | Acc], T).
+  parse_indents(CurrentIndent, Acc1, T);
+parse_indents(P, A, [H | T]) ->
+  parse_indents(P, [H | A], T).
 
-parse_tag(Tag) ->
+parse_tag(Chars, Line) ->
+  Trimmed = string:trim(Chars, both, "<>/ "),
+  {Tag, Rest} = string:take(Trimmed, " \n", true),
+  
   case lists:member(Tag, ?VOID_ELEMENTS) of
-    true -> {tag_void, }
-    false -> {tag_open, }
+    true -> {token, {tag_void, Line, {Tag, Rest}}};
+    false -> {token, {tag_open, Line, {Tag, Rest}}}
   end.
+
+close_tags(Tokens) -> close_tags([], [], Tokens).
+close_tags([], Acc, []) -> lists:reverse(Acc);
+close_tags(Stack, Acc, Tokens) -> Acc.
