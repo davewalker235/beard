@@ -2,16 +2,16 @@ Nonterminals
 content
 contents
 tag
-multiline_content
 multiline_contents
 block
 .
 
 Terminals
+string
+mustache
 indent
 dedent
 newline
-string
 tag_void
 tag_open
 tag_close
@@ -33,22 +33,20 @@ tag -> tag_open contents : {'$1', '$2'}.
 
 block -> indent multiline_contents dedent : '$2'.
 
-contents -> content : '$1'.
+contents -> content : ['$1'].
 contents -> content contents : ['$1' | '$2'].
 
-multiline_contents -> content : '$1'.
+multiline_contents -> content : ['$1'].
 multiline_contents -> content multiline_contents : ['$1' | '$2'].
 multiline_contents -> content newline multiline_contents : ['$1' | '$3'].
 
-content -> string : value('$1').
-content -> tag_void : value('$1').
-content -> tag : value('$1').
+content -> string : '$1'.
+content -> tag_void : '$1'.
+content -> tag : '$1'.
+content -> mustache : '$1'.
 
 Erlang code.
 
-debug({_, _, V} = Value) -> io:format("----------~n~p~n----------", [Value]), V;
-debug(Values) -> io:format("----------~n~p~n----------", [Values]), Values.
-
-value({Tag, Contents}) -> {value(Tag), Contents};
+value({Tag, Contents}) -> {Tag, Contents};
 value({_, _, {Tag, Attr}}) -> Tag;
 value({_, _, V}) -> V.

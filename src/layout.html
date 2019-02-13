@@ -22,7 +22,6 @@
   <p>
     This paragraph is under the div
 
-
 {{> partial/item }}
 
 <p> This paragraph is back up on the main level
@@ -43,7 +42,9 @@ How will the compiler handle that?
 <if=conn.user> test
 
 <ul if=conn.user>
-  <li loop=items><a href="{{ i.href }}"> {{ i }}
+  <li loop=items>
+    <a href="{{ i.href }}">
+      {{ i }}
   <li><a href=#> List item 1
   <li><a href=#> List item 2
   <li><a href=#> List item 3
@@ -53,3 +54,8 @@ How will the compiler handle that?
     <ul>
       <li> Line Three
       {{ test }}
+    Line four
+    Line five
+
+<NewElement>
+  Do something special with this
