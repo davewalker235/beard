@@ -3,15 +3,17 @@ Definitions.
 Mustache = {{\s+[^}]+\s+}}
 Atom = [a-zA-Z0-9]
 Indent = \n+\s*
-TagOpen = <{Atom}+[^>]*>
+TagStart = <{Atom}+\s*
 TagClose = </{Atom}+>
+Whitespace = (\n|\s|\t)
 
 Rules.
 
 {Mustache} : {token, {mustache, TokenLine, string:trim(TokenChars, both, "{ }")}}.
 {TagClose} : {token, {tag_close, TokenLine, string:trim(TokenChars, both, "</>")}}.
-{TagOpen} : parse_tag(TokenChars, TokenLine).
+{TagStart} : {token, {tag_start, TokenLine, string:trim(TokenChars, both, "< ")}}.
 {Indent} : {token, {newline, TokenLine, length(string:trim(TokenChars, leading, "\n")) div 2}}.
+{Whitespace} : {token, {whitespace, TokenLine, TokenChars}}.
 . : {token, {string, TokenLine, TokenChars}}.
 
 Erlang code.
